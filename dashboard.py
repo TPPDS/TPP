@@ -100,7 +100,6 @@ def get_count_state(df_filtro, name_c):
 def column_to_list_general(name_c, filter_eh, df):
     df_eh = pd.DataFrame(columns = [name_c])
     df_eh[name_c] = df[name_c].astype(str)
-    st.write(df_eh[name_c])
     df_eh[name_c] = df_eh[name_c].apply(literal_eval)
     get_index = []
     for i, l in enumerate(df_eh[name_c]):
