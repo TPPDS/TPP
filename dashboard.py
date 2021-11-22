@@ -343,9 +343,10 @@ with descargar_reporte:
                     worksheet.add_table(0, 0, max_row, max_col - 1, {'columns': column_settings, 'style': 'Table Style Light 11'})
                     worksheet.set_column(0, max_col - 1, 12)
                     worksheet = workbook.add_worksheet('Insights')
-                    
+
                     fig_general = chart_6(cantidad_list, e_hub, df_all, "Total")
-                    image_data = BytesIO(fig_general.to_image(format="png", engine = 'orca'))
+                    image_data = BytesIO(fig_general.to_image(format="png", engine = 'kaleido'))
+                    #image_data = BytesIO(fig_general.to_image(format="png", engine = 'orca'))
                     worksheet.insert_image(0, 0, 'plotly.png', {'image_data': image_data})
                     writer.save()
                 st.download_button("Descargar", buffer, "Reporte.xlsx")
