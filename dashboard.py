@@ -35,6 +35,7 @@ name_columns = ["Nombres", "Apellidos", "Género", "Fecha Nacimiento","Empresa/H
 #--------------------------------------------------------------------------------------
 #Configuración de la página para que esta sea ancha
 st.set_page_config(layout="wide")
+st.beta_set_page_config(page_title="Hello")
 #--------------------------------------------------------------------------------------
 #Configuración para ocultar menu de hamburguesa y pie de página
 hide_st_style = """
