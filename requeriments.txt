@@ -1,6 +1,7 @@
 pandas
 streamlit
-plotly
+plotly.express
+plotly.graph_objects
 ast
 xlsxwriter
 io
