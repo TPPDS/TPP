@@ -287,7 +287,7 @@ with general_insights:
             st.plotly_chart(fig_lic,use_container_width=True)
         with c5:
             list_count = get_count_state(st.session_state.df_filtro, "Estado Maestría/Posgrado")
-            fig_maestria = chart_7(list_count, "Maestría", "arriba")
+            fig_maestria = chart_7(list_count, "Maestría/Posgrado", "arriba")
             st.plotly_chart(fig_maestria,use_container_width=True)
         if filter_type == "Ninguno":
             st.plotly_chart(chart_3(get_count_courses(df_all)), use_container_width=True)
@@ -318,6 +318,36 @@ def ordenar_columnas(df):
     df = df.reindex(["Nombre Completo","Nombres","Apellidos","Género", "Fecha de Nacimiento","Empresa/Hub","Email","Puesto","Lugar Diversificado","Nombre Diversificado","Estado Diversificado","Lugar Licenciatura","Nombre Licenciatura","Estado Licenciatura","Lugar Maestría/Posgrado","Nombre Maestría/Posgrado","Estado Maestría/Posgrado","Lugar Cursos/Diplomados/Certificaciones","Nombre Cursos/Diplomados/Certificaciones","Estado Cursos/Diplomados/Certificaciones","Cantidad de Cursos/Diplomados/Certificaciones","Completo"], axis=1)
     df = df.sort_values(by="Cantidad de Cursos/Diplomados/Certificaciones", ascending=False)
     return df
+
+def get_count_state_report(df_filtro, name_c):
+    df_work = df_filtro
+    states = ["Terminado", "Cierre de Pensum", "En Curso"]
+    get_count = []
+    for index, value_s in enumerate(states):
+        df_states = pd.DataFrame(columns = [value_s])
+        df_states[name_c] = df_work[name_c].astype(str)
+        cant_terminado = 0
+        for i, l in enumerate(df_states[name_c]):
+            if l == value_s:
+                cant_terminado += 1
+        get_count.append(cant_terminado)
+    return get_count
+
+def get_count_courses_report(df_filtro):
+    df_work = df_filtro
+    df_work["Nombre Completo"] = df_work["Nombres"] + " " + df_work["Apellidos"]
+    name_c = "Nombre Cursos/Diplomados/Certificaciones"
+    df_courses = pd.DataFrame(columns = [name_c])
+    df_courses[name_c] = df_work[name_c].astype(str)
+    df_courses[name_c] = df_courses[name_c].apply(literal_eval)
+    get_count = []
+    for i, l in enumerate(df_courses[name_c]):
+        if l:
+            get_count.append(len(l))
+        else:
+            get_count.append(0)
+    df_work["Cantidad de Cursos/Diplomados/Certificaciones"] = get_count
+    return df_work
 #======================================================================================
 #======================================================================================
 st.markdown("***")
@@ -336,17 +366,65 @@ with descargar_reporte:
                     df_ordenado.to_excel(writer, sheet_name='Todo', index = False)
                     workbook  = writer.book
                     worksheet = writer.sheets['Todo']
+                    worksheet.set_zoom(50)
                     worksheet.conditional_format(1,20,len(df_ordenado)+1,20, {'type': 'data_bar', 'data_bar_2010': True, 'bar_color': '#ffa200'})
                     (max_row, max_col) = df_ordenado.shape
                     column_settings = [{'header': column} for column in df_ordenado.columns]
                     worksheet.add_table(0, 0, max_row, max_col - 1, {'columns': column_settings, 'style': 'Table Style Light 11'})
                     worksheet.set_column(0, max_col - 1, 12)
                     worksheet = workbook.add_worksheet('Insights')
-
                     fig_general = chart_6(cantidad_list, e_hub, df_all, "Total")
+                    fig_genero = chart_2(df_all, "")
+                    #image_data = BytesIO(fig_general.to_image(format="png", engine = 'kaleido'))
                     image_data = BytesIO(fig_general.to_image(format="png", engine = 'kaleido'))
-                    #image_data = BytesIO(fig_general.to_image(format="png", engine = 'orca'))
                     worksheet.insert_image(0, 0, 'plotly.png', {'image_data': image_data})
+                    image_data = BytesIO(fig_genero.to_image(format="png", engine = 'kaleido'))
+                    worksheet.insert_image(0, 11, 'plotly.png', {'image_data': image_data})
+                    count = 0
+                    for index, x in enumerate(["Diversificado", "Licenciatura", "Maestría/Posgrado"]):
+                        #st.write("Estado "+x)
+                        list_count = get_count_state_report(df_all, "Estado "+x)
+                        #st.write(list_count)
+                        fig_coso = chart_7(list_count, x, "arriba")
+                        image_data = BytesIO(fig_coso.to_image(format="png", engine = 'kaleido'))
+                        worksheet.insert_image(27, count, 'plotly.png', {'image_data': image_data})
+                        count += 11
+                    fig_coso = chart_3(df_all)
+                    image_data = BytesIO(fig_coso.to_image(format="png", engine = 'kaleido', width=2000))
+                    worksheet.insert_image(54, 0, 'plotly.png', {'image_data': image_data})
+                    worksheet.set_zoom(25)
+                    writer.save()
+                if report_type == "Por Empresa/Hub":
+                    for hojas in e_hub:
+                        df_filtrado = df_ordenado[df_ordenado["Empresa/Hub"]==hojas]
+                        df_filtrado.to_excel(writer, sheet_name=str(hojas), index = False)
+                        workbook  = writer.book
+                        worksheet = writer.sheets[hojas]
+                        worksheet.set_zoom(50)
+                        worksheet.conditional_format(1,20,len(df_filtrado)+1,20, {'type': 'data_bar', 'data_bar_2010': True, 'bar_color': '#ffa200'})
+                        (max_row, max_col) = df_filtrado.shape
+                        column_settings = [{'header': column} for column in df_filtrado.columns]
+                        worksheet.add_table(0, 0, max_row, max_col - 1, {'columns': column_settings, 'style': 'Table Style Light 11'})
+                        worksheet.set_column(0, max_col - 1, 12)
+                        worksheet = workbook.add_worksheet('Insights '+hojas)
+                        fig_general = chart_1(df_all, df_filtrado, hojas)
+                        fig_genero = chart_2(df_filtrado, "")
+                        #image_data = BytesIO(fig_general.to_image(format="png", engine = 'kaleido'))
+                        image_data = BytesIO(fig_general.to_image(format="png", engine = 'kaleido'))
+                        worksheet.insert_image(0, 0, 'plotly.png', {'image_data': image_data})
+                        image_data = BytesIO(fig_genero.to_image(format="png", engine = 'kaleido'))
+                        worksheet.insert_image(0, 11, 'plotly.png', {'image_data': image_data})
+                        count = 0
+                        for index, x in enumerate(["Diversificado", "Licenciatura", "Maestría/Posgrado"]):
+                            list_count = get_count_state_report(df_filtrado, "Estado "+x)
+                            fig_coso = chart_7(list_count, x, "arriba")
+                            image_data = BytesIO(fig_coso.to_image(format="png", engine = 'kaleido'))
+                            worksheet.insert_image(27, count, 'plotly.png', {'image_data': image_data})
+                            count += 11
+                        fig_coso = chart_3(df_filtrado)
+                        image_data = BytesIO(fig_coso.to_image(format="png", engine = 'kaleido'))
+                        worksheet.insert_image(54, 0, 'plotly.png', {'image_data': image_data})
+                        worksheet.set_zoom(25)
                     writer.save()
                 st.download_button("Descargar", buffer, "Reporte.xlsx")
         #st.write("<style>div.row-widget.stRadio > div{flex-direction:row;}</style>", unsafe_allow_html = True)
