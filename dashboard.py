@@ -373,12 +373,12 @@ with descargar_reporte:
                     worksheet.add_table(0, 0, max_row, max_col - 1, {'columns': column_settings, 'style': 'Table Style Light 11'})
                     worksheet.set_column(0, max_col - 1, 12)
                     worksheet = workbook.add_worksheet('Insights')
-                    fig_general = chart_6(cantidad_list, e_hub, df_all, "Total")
-                    fig_genero = chart_2(df_all, "")
+                    fig_g = chart_6(cantidad_list, e_hub, df_all, "Total")
+                    fig_ge = chart_2(df_all, "")
                     #image_data = BytesIO(fig_general.to_image(format="png", engine = 'kaleido'))
-                    image_data = BytesIO(fig_general.to_image(format="png", engine = 'kaleido'))
+                    image_data = BytesIO(fig_g.to_image(format="png", engine = 'kaleido'))
                     worksheet.insert_image(0, 0, 'plotly.png', {'image_data': image_data})
-                    image_data = BytesIO(fig_genero.to_image(format="png", engine = 'kaleido'))
+                    image_data = BytesIO(fig_ge.to_image(format="png", engine = 'kaleido'))
                     worksheet.insert_image(0, 11, 'plotly.png', {'image_data': image_data})
                     count = 0
                     for index, x in enumerate(["Diversificado", "Licenciatura", "Maestría/Posgrado"]):
@@ -407,12 +407,12 @@ with descargar_reporte:
                         worksheet.add_table(0, 0, max_row, max_col - 1, {'columns': column_settings, 'style': 'Table Style Light 11'})
                         worksheet.set_column(0, max_col - 1, 12)
                         worksheet = workbook.add_worksheet('Insights '+hojas)
-                        fig_general = chart_1(df_all, df_filtrado, hojas)
-                        fig_genero = chart_2(df_filtrado, "")
+                        fig_g = chart_1(df_all, df_filtrado, hojas)
+                        fig_ge = chart_2(df_filtrado, "")
                         #image_data = BytesIO(fig_general.to_image(format="png", engine = 'kaleido'))
-                        image_data = BytesIO(fig_general.to_image(format="png", engine = 'kaleido'))
+                        image_data = BytesIO(fig_g.to_image(format="png", engine = 'kaleido'))
                         worksheet.insert_image(0, 0, 'plotly.png', {'image_data': image_data})
-                        image_data = BytesIO(fig_genero.to_image(format="png", engine = 'kaleido'))
+                        image_data = BytesIO(fig_ge.to_image(format="png", engine = 'kaleido'))
                         worksheet.insert_image(0, 11, 'plotly.png', {'image_data': image_data})
                         count = 0
                         for index, x in enumerate(["Diversificado", "Licenciatura", "Maestría/Posgrado"]):
